@@ -1,0 +1,401 @@
+/* File script linker per compilazione con simboli e senza ottimizzazione
+   per debug con simulatore */
+
+OUTPUT_FORMAT("elf32-v850", "elf32-v850",
+	      "elf32-v850")
+
+OUTPUT_ARCH(v850)
+ENTRY(_start)
+SEARCH_DIR(.);
+
+
+/*        data    		 : ORIGIN = 0x00258000, LENGTH = 0x00027FFF	128K di dati tutto compreso nel prezzo   		*/
+/*        text    		 : ORIGIN = 0x00200000, LENGTH = 0x0004FFFF	256+128K di codice (384K)					   	*/
+/*        text 			 : ORIGIN = 0x00008000, LENGTH = 0x0003FFFF	256+128K di codice (384K)						*/
+
+/* Mappa base che funziona con le schede di produzione con su 256Kx16 di ram
+*/
+MEMORY {
+        text    		 : ORIGIN = 0x00110000, LENGTH = 0x00040000	 /* 256K di codice in ram */
+
+        rodata    		 : ORIGIN = 0x00150000, LENGTH = 0x00004000  /* 16K di ro-dati tutto compreso nel prezzo   	*/
+
+        message    		 : ORIGIN = 0x00154000, LENGTH = 0x00040000	 /* 16K di messagi tutto compreso nel prezzo   	*/
+
+		usrstk  		 : ORIGIN = 0x00194000, LENGTH = 0x00000FFF	 /* 8K di stack utente						 	*/
+
+        data    		 : ORIGIN = 0x03FF5000, LENGTH = 0x00006000  /* 24K data	-- 20K x la small heap			*/
+
+        stack   		 : ORIGIN = 0x03FFB000, LENGTH = 0x00004000	 /* 4K di system stack  				 		*/  
+
+        xdata  			 : ORIGIN = 0x00180000, LENGTH = 0x00000000	 /* ram esterna	64K*/
+
+         	
+}
+
+
+
+SECTIONS
+{
+
+  /* Read-only sections, merged into text segment: */
+  .init		: { *(.init) } =0
+  .plt		: { *(.plt) }
+
+  .text		:  
+  {
+  	 __stext = .;
+	__ctbp = .;    
+	
+	*(.call_table_data)
+
+    . = ALIGN(0x10);
+    *(.text)
+
+	. = ALIGN(0x10);
+    *(.call_table_text)
+
+
+    /* .gnu.warning sections are handled specially by elf32.em.  */
+    *(.gnu.warning)
+    *(.gnu.linkonce.t*)
+  } > text
+
+
+  .ctors	: {
+  . = ALIGN(0x10);
+    ___ctors = .;
+    *(.ctors)
+    ___ctors_end = .;
+  } > text
+
+  .dtors	: {
+    ___dtors = .;
+    *(.dtors)
+    ___dtors_end = .;
+
+    CONSTRUCTORS
+
+  } > text
+/*
+  .gcc_except_table : {
+
+  	*(.gcc_except_table)
+
+  } > gcc_except_table
+*/
+  
+  . = ALIGN(0x1000);
+
+ __etext = .;
+  PROVIDE (_etext = .);
+
+/* routines che devono girare in ram */
+
+  .ramcode	: AT ( __etext )
+  {
+  	__ramcode_start = .;
+
+    *(.ramcode)			
+
+  	 . = ALIGN(4);
+    __ramcode_end = .;
+  } > ramcode
+
+
+  
+	.rodata :
+	{
+		/* __codecpy_start = . ;
+
+		*(.codecpy)
+
+		. = ALIGN(4);
+		__codecpy_end = . ;
+		*/
+		. = ALIGN(4);
+
+		__rodata_start = . ;
+
+			*(.rodata)
+			*(.gnu.linkonce.r*)
+			*(.gcc_except_table)
+
+		. = ALIGN(4);
+		/*__rodata_end = . */;
+
+	} > rodata
+
+  
+	.rodata.cst4 :
+	{
+		__rodata.cst4_start = .;
+		/* *(.codecpy) */
+
+		. = ALIGN(4);
+
+		 *(.rodata.cst4)
+
+		. = ALIGN(4);
+		__rodata_end = . ;
+
+
+	} > rodata
+
+	.message :
+	{
+		__message_start = .;
+
+		*(.message)
+
+		 . = ALIGN(4);
+
+		__message_end = .;
+
+	} > message
+
+  	/* fine della flash interna del microbo utilizzata */
+	PROVIDE( _intflash_end = __message_end);
+
+
+
+	/* User stack */
+	.usrstk : {
+
+
+		__base_heap = . ;
+
+		PROVIDE (_base_heap = .);
+
+		__end_heap = .;
+
+		PROVIDE (_end_heap = . );
+
+		*(.user_stack)
+
+		__user_stack = .;
+
+	} > usrstk
+ 
+ 	
+   /*.fini		: { *(.fini)    } =0*/
+
+  .data		: AT ( __rodata_end )
+  {
+  	 . = ALIGN(0x10);
+  	__data_start = .;
+
+    *(.data)			/* copia dei dati non inizializzati */
+    *(.gnu.linkonce.d*)
+
+  	 . = ALIGN(0x04);
+
+    __data_end = .;
+
+  } > data
+
+	PROVIDE( __datarom_end = __rodata_end ); /*+ SIZEOF(.data) );*/
+
+  .got		: { *(.got.plt) *(.got) }
+  .dynamic	: { *(.dynamic) }
+
+  .tdata ALIGN (4) : {
+	PROVIDE (__ep = .);
+	*(.tbyte)
+	*(.tcommon_byte)
+	*(.tdata)
+	*(.tbss)
+	*(.tcommon)
+  }
+
+  /* We want the small data sections together, so single-instruction offsets
+     can access them all, and initialized data all before uninitialized, so
+     we can shorten the on-disk segment size.  */
+  .sdata ALIGN (4) : {
+	PROVIDE (__gp = . + 0x8000);
+	*(.sdata)
+
+	__sbss_start = .;
+
+	*(.sbss)
+	*(.scommon)
+  }
+
+  /* See comment about .rozdata  */
+  .rosdata ALIGN (4) : 
+  {
+	*(.rosdata)
+  }
+  
+  _edata  = DEFINED (__sbss_start) ? __sbss_start : . ;
+  PROVIDE (edata = _edata);
+
+  .bss ALIGN(4):
+  {
+	__bss_start = DEFINED (__sbss_start) ? __sbss_start : . ;
+
+	*(.dynbss)
+	*(.bss)
+	*(COMMON)
+  }
+
+  _end = . ;
+  PROVIDE (end = .);
+
+  . = ALIGN(4);
+  __base_small_heap = . ;
+  PROVIDE (_base_small_heap = .);
+
+ 
+ /* System Stack */
+  .stack : {
+
+	__end_small_heap = .;
+    PROVIDE (_end_small_heap = __end_small_heap );
+
+	__stack = .;
+	*(.stack)
+
+	__end_stack = .;	
+	PROVIDE (_end_stack = __end_stack);
+
+  } > stack
+
+   /* external ram */
+  .xdata : {
+  	__xdata_start = .;
+	*(.xdata)
+	__xdata = .;
+
+	__xdata_end = .;
+  } > xdata
+ 
+  /* Stabs debugging sections.  */
+  .stab 0		: { *(.stab) }
+  .stabstr 0		: { *(.stabstr) }
+  .stab.excl 0		: { *(.stab.excl) }
+  .stab.exclstr 0	: { *(.stab.exclstr) }
+  .stab.index 0		: { *(.stab.index) }
+  .stab.indexstr 0	: { *(.stab.indexstr) }
+  .comment 0		: { *(.comment) }
+
+  /* DWARF debug sections.
+     Symbols in the DWARF debugging sections are relative to the beginning
+     of the section so we begin them at 0.  */
+
+  /* DWARF 1 */
+  .debug          0	: { *(.debug) }
+  .line           0	: { *(.line) }
+
+  /* GNU DWARF 1 extensions */
+  .debug_srcinfo  0	: { *(.debug_srcinfo) }
+  .debug_sfnames  0	: { *(.debug_sfnames) }
+
+  /* DWARF 1.1 and DWARF 2 */
+  .debug_aranges  0	: { *(.debug_aranges) }
+  .debug_pubnames 0	: { *(.debug_pubnames) }
+
+  /* DWARF 2 */
+  .debug_info     0	: { *(.debug_info) }
+  .debug_abbrev   0	: { *(.debug_abbrev) }
+  .debug_line     0	: { *(.debug_line) }
+  .debug_frame    0	: { *(.debug_frame) }
+  .debug_str      0	: { *(.debug_str) }
+  .debug_loc      0	: { *(.debug_loc) }
+  .debug_macinfo  0	: { *(.debug_macinfo) }
+
+  /* SGI/MIPS DWARF 2 extensions */
+  .debug_weaknames 0	: { *(.debug_weaknames) }
+  .debug_funcnames 0	: { *(.debug_funcnames) }
+  .debug_typenames 0	: { *(.debug_typenames) }
+  .debug_varnames  0	: { *(.debug_varnames) }
+
+  /* These must appear regardless of  .  */
+  /* This saves a little space in the ELF file, since the zda starts
+     at a higher location that the ELF headers take up.  */
+  .zdata 0x00460000 : {
+	*(.zdata)
+	*(.zbss)
+	*(reszdata)
+	*(.zcommon)
+  }
+
+
+  /* This is the read only part of the zero data area.
+     Having it as a seperate section prevents its
+     attributes from being inherited by the zdata
+     section.  Specifically it prevents the zdata
+     section from being marked READONLY.  */
+  .rozdata ALIGN (4) : {
+	*(.rozdata)
+	*(romzdata)
+	*(romzbss)
+  }
+
+}
+
+STARTUP(obj/startup.o)
+INPUT(obj/crt0.o)
+INPUT(obj/crt1.o)
+INPUT(obj/main.o)
+INPUT(obj/IRQSG2.o)
+INPUT(obj/ERROR.o)
+INPUT(obj/ALLOC.o)
+INPUT(obj/NEW.o)
+INPUT(obj/STRCLASS.o)
+INPUT(obj/PRINT.o)
+INPUT(obj/SWTIM.o)
+INPUT(obj/util.o)
+INPUT(obj/sioSG2.o)
+INPUT(obj/SOUND.o)
+INPUT(obj/KEYABSTRACT.o)
+INPUT(obj/KEYBOARD.o)
+INPUT(obj/ADCABSTRACT.o)
+INPUT(obj/ADC_NEC.o)
+INPUT(obj/ADC_SAU7000.o)
+INPUT(obj/UARTABSTRACT.o)
+INPUT(obj/UARTNEC.o)
+INPUT(obj/UARTFPGA.o)
+INPUT(obj/PROTOCOLSTDUART.o)
+INPUT(obj/PROTOCOLSAUANDPC.o)
+INPUT(obj/PROTOCOL_uC.o)
+INPUT(obj/PROTOCOLSAUANDEMGZ.o)
+INPUT(obj/iWRAP_BLUEGIGA.o)
+INPUT(obj/iWRAP_BLUEGIGA_SPP.o)
+INPUT(obj/SAU7000_MANAGER.o)
+INPUT(obj/DPYDRV.o)
+INPUT(obj/CHRSET.o)
+INPUT(obj/GRAPH.o)
+INPUT(obj/APPMENU.o)
+INPUT(obj/ICONS.o)
+INPUT(obj/EEPROM_SPI.o)
+INPUT(obj/SAU7000_ADuC_SOURCE.o)
+INPUT(obj/PROTOCOLADuCfwUPGRADE.o)
+INPUT(obj/ADuC_UPGRADEMANAGER.o)
+INPUT(obj/TIMER_NEC.o)
+INPUT(obj/PWMABSTRACT.o)
+INPUT(obj/PWM_NEC.o)
+INPUT(obj/WTH.o)
+INPUT(obj/IR_Toshiba_protocol.o)
+INPUT(obj/IR_RC5_Standard_protocol.o)
+INPUT(obj/IR_remote.o)
+INPUT(obj/SPI_ABSTRACT.o)
+INPUT(obj/SPI_NEC.o)
+INPUT(obj/TMC262_DRV.o)
+INPUT(obj/WTP.o)
+INPUT(obj/SSPIE_HARDWARE.o)
+INPUT(obj/SSPIE_CORE.o)
+INPUT(obj/SSPIE_INTRFACE.o)
+INPUT(obj/SSPIE_MAIN.o)
+INPUT(obj/SSPIE_SSPIEm.o)
+INPUT(obj/SSPIE_UTIL.o)
+INPUT(obj/ADuCSETTING.o)
+
+/*INPUT(c:\gcc850\lib\libstdc++.a)*/
+INPUT(c:\gcc850\lib\libm.a)
+INPUT(c:\gcc850\lib\libc.a)
+
+/*INPUT(c:\gcc850\lib\v850e\libgcc.a)*/
+INPUT(c:\gcc850\lib\libgcc.a)
+OUTPUT(SAU7000.OUT)
+

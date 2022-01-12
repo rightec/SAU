@@ -1,0 +1,24 @@
+Producer: Nec
+Family:   JG2
+Core:     V850ES
+Device:   uPD70F3719-8EA-A
+
+Internal Flash Area - 640KB
+Start: 0x00000000
+End:   0x0009FFFF
+
+Internal RAM - 48KB
+Start: 0x03FF3000
+End:   0x03FFEFFF
+
+External Flash Area - 0KB
+Start: xxxx
+End:   xxxx
+
+External RAM - 512KB
+Start: 0x00110000
+End:   0x0017FFFF
+
+Video Memory - 64K
+Start: xxxx
+End:   xxxx

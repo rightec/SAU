@@ -1,0 +1,4 @@
+
+set remotebaud 230400
+target remote /dev/com4
+

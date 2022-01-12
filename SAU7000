@@ -1,0 +1,4 @@
+set remotebaud 115200
+target remote /dev/ttyS3
+load sau7000.elf
+set $pc=start

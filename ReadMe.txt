@@ -1,0 +1,1 @@
+Carira un mini applicativo nella Ram Interna del uC
