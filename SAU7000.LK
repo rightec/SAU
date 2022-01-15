@@ -18,17 +18,17 @@ SEARCH_DIR(.);
 MEMORY {
         text    		 : ORIGIN = 0x00110000, LENGTH = 0x00040000	 /* 256K di codice in ram */
 
-        rodata    		 : ORIGIN = 0x00150000, LENGTH = 0x00004000  /* 16K di ro-dati tutto compreso nel prezzo   	*/
+        rodata    	 : ORIGIN = 0x00150000, LENGTH = 0x0002FFFF  	 /* 18K di ro-dati tutto compreso nel prezzo   	*/
 
-        message    		 : ORIGIN = 0x00154000, LENGTH = 0x00040000	 /* 16K di messagi tutto compreso nel prezzo   	*/
+        message    	 : ORIGIN = 0x00180000, LENGTH = 0x00040000	 /* 16K di messagi tutto compreso nel prezzo   	*/
 
-		usrstk  		 : ORIGIN = 0x00194000, LENGTH = 0x00000FFF	 /* 8K di stack utente						 	*/
+	 usrstk  		 : ORIGIN = 0x001C0000, LENGTH = 0x00000FFF	 /* 8K di stack utente						 	*/
 
-        data    		 : ORIGIN = 0x03FF5000, LENGTH = 0x00006000  /* 24K data	-- 20K x la small heap			*/
+        data    		 : ORIGIN = 0x03FF5000, LENGTH = 0x00006000  	 /* 24K data	-- 20K x la small heap			*/
 
         stack   		 : ORIGIN = 0x03FFB000, LENGTH = 0x00004000	 /* 4K di system stack  				 		*/  
 
-        xdata  			 : ORIGIN = 0x00180000, LENGTH = 0x00000000	 /* ram esterna	64K*/
+        xdata  		 : ORIGIN = 0x00180000, LENGTH = 0x00000000	 /* ram esterna	64K*/
 
          	
 }

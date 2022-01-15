@@ -1,0 +1,8 @@
+#BlueTooth Branch
+File di riferimento: iWrap_BlueGIGA_spp,h
+
+class iWRAP_BLUEGIGA_SPP: protected iWRAP_BLUEGIGA_Protocol
+	---> iWRAP_BLUEGIGA_Protocol: public stdUartProtocolAbstraction
+		---> class stdUartProtocolAbstraction
+
+Comandi BlueTooth: enum iWRAP_cmd; in iWRAO_BLUEGIGA.h

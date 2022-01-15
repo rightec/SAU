@@ -1,4 +1,4 @@
-target remote /dev/ttyS3
 set remotebaud 115200
+target remote /dev/ttyS3
 load SAU7000.OUT
 set $pc=start

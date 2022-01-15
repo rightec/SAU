@@ -5,8 +5,8 @@
 #=======================================================================
 
 # Target definition:
-#TGTROM 	= 	1		# flash rom compil.
-TGTROM = 				# simulator compil.
+TGTROM 	= 	1		# flash rom compil.
+#TGTROM = 				# simulator compil.
 
 
 # Standard defines:
