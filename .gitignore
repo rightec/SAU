@@ -6,7 +6,6 @@ lst
 src
 Icons
 *.dll
-*.REC
 *.elf
 *.OUT
 *.OUR
