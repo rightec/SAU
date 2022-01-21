@@ -26,6 +26,8 @@ STX value
 */
 #define SAUPC_STX '\n'
 
+#define _TIME_AFTER_STX	50 //Former was 100. With 50 it should fail. 21/01/2022
+
 struct overpressure_bitF_t
 {
     word prs_01 :1;

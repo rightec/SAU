@@ -413,7 +413,7 @@ void SAU7000_Manager::manager()
 	//--- Checking ADuCs states timer ---
 	if (m_timerWaitAduCResponse.Match())
 	{
-		m_timerWaitAduCResponse.Preset(500);
+		m_timerWaitAduCResponse.Preset(_TIME_WAIT_ADuC_RESP_DEFAULT);
 		if (!checkADuCStatus(m_ADuCsWantedStatus))
 		{
 			switch (getSau7000status())
@@ -1213,6 +1213,7 @@ void SAU7000_Manager::Sau7000status_bluetoothCheck_Handler()
 	int i;
 	byte data;
 	char str[30];
+	int btError = 0; // 21/01/2022
 	
 	switch (m_BTcheckStatus)
 	{
@@ -1306,6 +1307,23 @@ void SAU7000_Manager::Sau7000status_bluetoothCheck_Handler()
 			changeBTcheckStatus(BTchk_waiting_RING);
 			break;
 		case BTchk_waiting_RING:
+			/* #21012021 - Sometimes it stops here and it never goes out 
+			1 - Check if there is a BT error*/
+			
+			// btError = m_bluetoothProtocol->popBlueError();
+			
+			// (int)(stdUart_Hw_OverrunError)
+			/*
+			if (btError == 4)
+			{
+				// pageInfo->addStr("RING ABSENT - Overrun...");
+				// Clear the uart buffer 
+				//  m_bluetoothProtocol->clearRx();
+				//  m_bluetoothProtocol->clearTx();
+				//  changeSau7000status(Sau7000status_bluetoothCheck);
+			}
+			*/
+			
 			break;
 
 	/*	case BTchk_PAIR:
@@ -2240,7 +2258,7 @@ void SAU7000_Manager::startADuCs()
 		m_ADuCacqCheckTimer[i].Preset(500);
 	}
 
-	m_timerWaitAduCResponse.Preset(500);
+	m_timerWaitAduCResponse.Preset(_TIME_WAIT_ADuC_RESP_DEFAULT);
 	
 	m_ADuCsWantedStatus = ADuCStatus_acquiring;
 }
@@ -2256,7 +2274,7 @@ void SAU7000_Manager::setADuCsAquisitionParameters()
 		m_ADuC_Protocols[i]->sendSetting();
 	}
 	
-	m_timerWaitAduCResponse.Preset(500);
+	m_timerWaitAduCResponse.Preset(_TIME_WAIT_ADuC_RESP_DEFAULT);
 	
 	m_ADuCsWantedStatus = ADuCStatus_set;
 }
@@ -2273,7 +2291,7 @@ void SAU7000_Manager::stopADuCs()
 		m_ADuCacqCheckTimer[i].Stop();
 	}
 
-	m_timerWaitAduCResponse.Preset(500);
+	m_timerWaitAduCResponse.Preset(_TIME_WAIT_ADuC_RESP_DEFAULT);
 	
 	m_ADuCsWantedStatus = ADuCStatus_idle;
 }		
