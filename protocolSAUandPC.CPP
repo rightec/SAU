@@ -132,7 +132,7 @@ char dataBuff;
 				if (dataBuff == SAUPC_STX)
 				{
 					stopTxTimeoutTimer();
-					setTimeoutRx(_TIME_AFTER_STX);
+					setTimeoutRx(100);
 					startRxTimeoutTimer();
 					setReceiverState(stdUart_waitOpCode1);
 				}else
@@ -227,8 +227,7 @@ char dataBuff;
 			case stdUart_waitEtx:
 				break;
 			default:
-				// setError(stdUart_ChecksumError);  // Set it as a generic error in case of umpredicted STOP: 21/01/2022 - It block the statrt up
-				// setError((int)stdUart_stxNotReceived); // Set it as a generic error in case of umpredicted STOP: 21/01/2022 - It block the statrt up
+				
 				break;
 		}	
 	}

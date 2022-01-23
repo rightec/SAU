@@ -51,7 +51,6 @@ Time in msec that have to elapse to ask the status to all the ADuC while the acq
 */
 #define _TIME_CHECK_ADuC_STATUS_WHILE_SAMPLING_	2500
 #define _TIME_CHECK_EMGZ_STATUS_WHILE_SAMPLING_	2500
-#define _TIME_WAIT_ADuC_RESP_DEFAULT					200	   // Basically was 500 - 21/01/2022
 
 /**
 Manage the machine state of board.

@@ -628,7 +628,6 @@ public:
 
 	void clearTx(){stdUartProtocolAbstraction::clearTx();}
 	void clearRx(){stdUartProtocolAbstraction::clearRx();}
-	int popBlueError(){return stdUartProtocolAbstraction::popError();}
 	
 protected:
 	virtual bool DataAnalyse();

@@ -18,7 +18,7 @@
 #include "iWRAP_BLUEGIGA.h"
 
 
-class iWRAP_BLUEGIGA_SPP: public iWRAP_BLUEGIGA_Protocol
+class iWRAP_BLUEGIGA_SPP: protected iWRAP_BLUEGIGA_Protocol
 {
 public:
 	typedef struct
@@ -104,7 +104,6 @@ public:
 
 	void clearTx(){iWRAP_BLUEGIGA_Protocol::clearTx();}
 	void clearRx(){iWRAP_BLUEGIGA_Protocol::clearRx();}
-	int popBlueError(){return iWRAP_BLUEGIGA_Protocol::popBlueError();}
 	
 protected:
 	enum states 

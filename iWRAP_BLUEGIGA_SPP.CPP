@@ -214,7 +214,8 @@ void iWRAP_BLUEGIGA_SPP::manager()
 	//--- machine state ---
 	switch(m_currentState)
 	{
-		case _idle:			
+		case _idle:
+			
 			break;
 		case _setting_baud:
 			_setting_baud_handler();
